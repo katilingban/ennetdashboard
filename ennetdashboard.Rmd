@@ -1,0 +1,136 @@
+---
+title: "en-net"
+runtime: shiny
+output: 
+  flexdashboard::flex_dashboard:
+    orientation: rows
+    vertical_layout: fill
+    social: [ "twitter", "linkedin" ]
+    source_code: https://github.com/katilingban/ennetdashboard
+    theme: cerulean
+---
+
+```{r setup, include = FALSE}
+if(!require(flexdashboard)) install.packages("flexdashboard")
+if(!require(ggplot2)) install.packages("ggplot2")
+if(!require(magrittr)) install.packages("magrittr")
+if(!require(plotly)) install.packages("plotly")
+if(!require(lubridate)) install.packages("lubridate")
+if(!require(leaflet)) install.packages("leaflet")
+if(!require(RColorBrewer)) install.packages("RColorBrewer")
+if(!require(remotes)) install.packages("remotes")
+if(!require(ennet)) remotes::install_github(repo = "katilingban/ennet")
+
+library(flexdashboard)
+library(ggplot2)
+library(magrittr)
+library(plotly)
+library(lubridate)
+library(leaflet)
+library(RColorBrewer)
+library(remotes)
+library(ennet)
+
+## Create Mapbox base layer objects for leaflet mapping
+mapbox.satellite <- "https://api.mapbox.com/styles/v1/mapbox/satellite-streets-v10/tiles/256/{z}/{x}/{y}?access_token=pk.eyJ1IjoiZXJuZXN0Z3VldmFycmEiLCJhIjoiejRRLXlZdyJ9.sqS1zi0rDH5CIzvcn9SXSg"
+mapbox.street    <- "https://api.mapbox.com/styles/v1/mapbox/streets-v10/tiles/256/{z}/{x}/{y}?access_token=pk.eyJ1IjoiZXJuZXN0Z3VldmFycmEiLCJhIjoiejRRLXlZdyJ9.sqS1zi0rDH5CIzvcn9SXSg"
+mapbox.dark      <- "https://api.mapbox.com/styles/v1/mapbox/dark-v9/tiles/256/{z}/{x}/{y}?access_token=pk.eyJ1IjoiZXJuZXN0Z3VldmFycmEiLCJhIjoiejRRLXlZdyJ9.sqS1zi0rDH5CIzvcn9SXSg"
+mapbox.light     <- "https://api.mapbox.com/styles/v1/mapbox/light-v9/tiles/256/{z}/{x}/{y}?access_token=pk.eyJ1IjoiZXJuZXN0Z3VldmFycmEiLCJhIjoiejRRLXlZdyJ9.sqS1zi0rDH5CIzvcn9SXSg"
+mapbox.moonlight <- "https://api.mapbox.com/styles/v1/ernestguevarra/cj3nban30001z2rpahc10c9ef/tiles/256/{z}/{x}/{y}?access_token=pk.eyJ1IjoiZXJuZXN0Z3VldmFycmEiLCJhIjoiejRRLXlZdyJ9.sqS1zi0rDH5CIzvcn9SXSg"
+mapbox.northstar <- "https://api.mapbox.com/styles/v1/ernestguevarra/cj4ke832y4sng2spe2ds4fs55/tiles/256/{z}/{x}/{y}?access_token=pk.eyJ1IjoiZXJuZXN0Z3VldmFycmEiLCJhIjoiejRRLXlZdyJ9.sqS1zi0rDH5CIzvcn9SXSg"
+mapbox.standard  <- "https://api.mapbox.com/styles/v1/ernestguevarra/cj5di36jn0gxg2rphjn3yetpt/tiles/256/{z}/{x}/{y}?access_token=pk.eyJ1IjoiZXJuZXN0Z3VldmFycmEiLCJhIjoiejRRLXlZdyJ9.sqS1zi0rDH5CIzvcn9SXSg"
+mapbox.decimal   <- "https://api.mapbox.com/styles/v1/ernestguevarra/cj5ms1akt3pbi2smtcewsex9m/tiles/256/{z}/{x}/{y}?access_token=pk.eyJ1IjoiZXJuZXN0Z3VldmFycmEiLCJhIjoiejRRLXlZdyJ9.sqS1zi0rDH5CIzvcn9SXSg"
+mapbox.terminal  <- "https://api.mapbox.com/styles/v1/ernestguevarra/cj6g0tzbd30kc2sph2wyh666m/tiles/256/{z}/{x}/{y}?access_token=pk.eyJ1IjoiZXJuZXN0Z3VldmFycmEiLCJhIjoiejRRLXlZdyJ9.sqS1zi0rDH5CIzvcn9SXSg"
+mapbox.leshine  <- "https://api.mapbox.com/styles/v1/ernestguevarra/cjdlr8pvl0xiv2sqvq1evk1pl/tiles/256/{z}/{x}/{y}?access_token=pk.eyJ1IjoiZXJuZXN0Z3VldmFycmEiLCJhIjoiejRRLXlZdyJ9.sqS1zi0rDH5CIzvcn9SXSg"
+
+## Load UNICEF palette
+unicef_blue      <- "#1CABE2"
+unicef_darkgreen <- "#00833D"
+unicef_green     <- "#80BD41"
+unicef_yellow    <- "#FFC20E"
+unicef_orange    <- "#F26A21"
+unicef_red       <- "#E2231A"
+unicef_darkred   <- "#961A49" 
+unicef_purple    <- "#6A1E74"
+unicef_warmgrey  <- "#D8D1C9"
+unicef_coolgrey  <- "#777779"
+unicef_black     <- "#2D2926"
+unicef_darkblue  <- "#374EA2"
+
+## UNICEF ggplot theme settings
+unicef_theme <- theme_bw() +
+  theme(plot.title = element_text(size = 16, colour = unicef_darkblue),
+        plot.subtitle = element_text(size = 14, colour = unicef_blue),
+        panel.border = element_rect(colour = unicef_darkblue,
+                                    size = 0.5),
+        panel.grid.major = element_line(linetype = 0),
+        panel.grid.minor = element_line(linetype = 0),
+        strip.background = element_rect(colour = unicef_darkblue,
+                                        fill = unicef_darkblue),
+        strip.text = element_text(face = "bold", colour = "white", size = 10, vjust = 1),
+        legend.background = element_rect(colour = NA, fill = NA),
+        legend.key = element_rect(linetype = 0),
+        legend.key.size = unit(x = 8, units = "points"),
+        legend.spacing = unit(x = 4, units = "points"),
+        legend.text = element_text(size =  8),
+        legend.position = "top",
+        axis.line.x = element_line(colour = unicef_darkblue, size = 0.5),
+        axis.text.x = element_text(size = 10, colour = unicef_darkblue),
+        axis.title.x = element_text(size = 12, colour = unicef_blue),
+        axis.text.y = element_text(size = 10, colour = unicef_darkblue),
+        axis.title.y = element_text(size = 12, colour = unicef_blue),
+        axis.ticks = element_line(colour = unicef_darkblue, size = 0.25))
+
+## Katilingban theme
+katilingban_theme <- theme_bw() +
+  theme(panel.border = element_rect(colour = "gray50",
+                                    size = 0.5),
+        panel.grid.major = element_line(linetype = 1,
+                                        size = 0.1,
+                                        colour = "gray90"),
+        panel.grid.minor = element_line(linetype = 0),
+        strip.background = element_rect(colour = "gray50",
+                                        fill = "gray70"),
+        strip.text = element_text(colour = "white", size = 12),
+        legend.text = element_text(size = 12),
+        legend.key = element_rect(linetype = 0),
+        legend.key.size = unit(0.5, "cm"),
+        legend.position = "top",
+        axis.title = element_text(size = 12),
+        axis.text.x = element_text(size = 10),
+        axis.text.y = element_text(size = 10),
+        axis.ticks = element_line(colour = "gray50", size = 0.5))
+
+legend.format <- function (prefix = "", 
+                           suffix = "", 
+                           between = " &ndash; ", 
+                           digits = 3, 
+                           big.mark = ",", 
+                           transform = identity) {
+  formatNum <- function(x) {
+    format(round(transform(x), digits), trim = TRUE, 
+           scientific = FALSE, big.mark = big.mark)
+  }
+    function(type, ...) {
+        switch(type, numeric = (function(cuts) {
+            paste0(prefix, formatNum(cuts), suffix)
+        })(...), bin = (function(cuts) {
+            n = length(cuts)
+            paste0(prefix, formatNum(cuts[-n]), between, formatNum(cuts[-1]), 
+                suffix)
+        })(...), quantile = (function(cuts, p) {
+            n = length(cuts)
+            p = paste0(round(p * 100), "%")
+            cuts = paste0(formatNum(cuts[-n]), between, formatNum(cuts[-1]), suffix)
+        })(...), factor = (function(cuts) {
+            paste0(prefix, as.character(transform(cuts)), suffix)
+        })(...))
+    }
+}
+```
+
+Overview
+================================================================================
+
+Row
+--------------------------------------------------------------------------------
