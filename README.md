@@ -1,7 +1,7 @@
 
 <!-- README.md is generated from README.Rmd. Please edit that file -->
 
-# ennetdashboard
+# ennetdashboard: en-net Online Forum Dashboard
 
 <!-- badges: start -->
 

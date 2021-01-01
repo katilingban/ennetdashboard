@@ -11,7 +11,7 @@ knitr::opts_chunk$set(
 )
 ```
 
-# ennetdashboard
+# ennetdashboard: en-net Online Forum Dashboard
 
 <!-- badges: start -->
 [![shinyapps](https://github.com/katilingban/ennetdashboard/workflows/shinyapps/badge.svg)](https://github.com/katilingban/ennetdashboard/actions?query=workflow%3Ashinyapps)
