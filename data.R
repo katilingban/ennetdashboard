@@ -72,7 +72,7 @@ dailies <- hourlies %>%
 ## Process weeklies topics data ------------------------------------------------
   weeklies <- dailies %>%
   group_by(Theme, Topic, Author, Posted, Link, Interaction, 
-           `Extraction Week` = lubridate::week(`Extraction Date`)) %>%
+           `Extraction Week` = lubridate::isoweek(`Extraction Date`)) %>%
   filter(Extraction == max(Extraction, na.rm = TRUE))
 
 ## Process monthlies topics data -----------------------------------------------
