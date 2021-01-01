@@ -151,11 +151,6 @@ selectInput(inputId = "themes_options",
             selected = themes[1:3],
             multiple = TRUE)
 
-#selectInput(inputId = "type_options",
-#            label = "Metric",
-#            choices = c("Posts", "Views", "Replies"),
-#            selected = "Posts")
-
 selectInput(inputId = "year_start",
             label = "From",
             selected = min(unique(lubridate::year(topics$Posted))),
