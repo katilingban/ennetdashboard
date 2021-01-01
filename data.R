@@ -4,7 +4,6 @@ library(dplyr)
 library(tidyr)
 library(stringr)
 library(lubridate)
-library(gh)
 
 ## Read discussions data -------------------------------------------------------
 
