@@ -145,31 +145,31 @@ Inputs {.sidebar}
 ```{r filters}
 h4("Filters")
 
-#checkboxGroupInput(inputId = "themes_options",
-#                   label = "Themes",
-#                   selected = 1:3,
-#                   choiceNames = themes,
-#                   choiceValues = seq_len(length(themes)))
-
 selectInput(inputId = "themes_options",
             label = "Themes",
             choices = themes,
             selected = themes[1:3],
             multiple = TRUE)
 
-#observeEvent(length(input$themes_options) > 3 | 
-#               length(input$themes_options) < 1, {
-#  updateCheckboxGroupInput(session = session,
-#                           inputId = "themes_options",
-#                           label = "Themes",
-#                           selected = input$themes_options,
-#                           choiceNames = themes,
-#                           choiceValues = seq_len(length(themes)))
-#})
+selectInput(inputId = "type_options",
+            label = "Metric",
+            choices = c("Posts", "Views", "Replies"),
+            selected = "Posts")
 
-selectInput(inputId = "year_options",
-            label = "Year",
-            choices = c(" ", lubridate::year(topics$Posted)))
+selectInput(inputId = "year_start",
+            label = "From",
+            selected = min(unique(lubridate::year(topics$Posted))),
+            choices = rev(unique(lubridate::year(topics$Posted))))
+
+selectInput(inputId = "year_end",
+            label = "To",
+            selected = max(unique(lubridate::year(topics$Posted))),
+            choices = rev(unique(lubridate::year(topics$Posted))))
+
+selectInput(inputId = "scale_options",
+            label = "Scale options",
+            selected = "fixed",
+            choices = c("fixed", "free", "free_x", "free_y"))
 ```
 
 Row {.tabset .tabset-fade}
@@ -177,34 +177,55 @@ Row {.tabset .tabset-fade}
 
 ### Monthly
 
-```{r monthly_topics}
+```{r monthlies}
 output$monthly_topics <- renderPlotly({
-  req(input$themes_options, input$year_options)
+  req(input$themes_options)
   
-  if (input$year_options == " ") {
-    year_options <- lubridate::year(topics$Posted)
-  } else {
-    year_options <- input$year_options
-  }
+  time_period <- input$year_start:input$year_end
   
   z <- topics %>%
     filter(Theme %in% input$themes_options,
-           lubridate::year(Posted) %in% year_options) %>%
+           lubridate::year(Posted) %in% time_period) %>%
     count_topics(by_date = "month_year") %>%
     mutate(`Month Year` = paste(Month, Year, sep = " "),
            `Month Year` = lubridate::my(`Month Year`)) %>%
     ggplot(mapping = aes(x = `Month Year`, y = n)) +
-    geom_col() +
+    geom_col(fill = unicef_blue, colour = unicef_blue, alpha = 0.7) +
     scale_x_date(name = "", date_breaks = "3 months", date_labels = "%b %Y") +
     labs(title = "Number of questions posted per month by theme",
-         y = "No. of posts") +
-    facet_wrap(. ~ Theme, ncol = 1) +
-    katilingban_theme +
+         y = "No. of questions posted") +
+    facet_wrap(. ~ Theme, ncol = 1, scales = input$scale_options) +
+    unicef_theme +
+    theme(axis.text.x = element_text(size = 8, angle = 90),
+          axis.text.y = element_text(size = 8))
+
+  ggplotly(p = z)
+})
+
+plotlyOutput(outputId = "monthly_topics")
+```
+
+### Yearly
+
+```{r yearlies}
+output$yearly_topics <- renderPlotly({
+  req(input$themes_options)
+  
+  z <- topics %>%
+    filter(Theme %in% input$themes_options) %>%
+    count_topics(by_date = "year") %>%
+    ggplot(mapping = aes(x = Year, y = n)) +
+    geom_col(fill = unicef_blue, colour = unicef_blue, alpha = 0.7) +
+    scale_x_continuous(name = "", breaks = rev(unique(lubridate::year(topics$Posted)))) +
+    labs(title = "Number of questions posted per year by theme",
+         y = "No. of questions posted") +
+    facet_wrap(. ~ Theme, ncol = 1, scales = input$scale_options) +
+    unicef_theme +
     theme(axis.text.x = element_text(size = 8, angle = 90),
           axis.text.y = element_text(size = 8))
   
   ggplotly(p = z)
 })
 
-plotlyOutput(outputId = "monthly_topics")
+plotlyOutput(outputId = "yearly_topics")
 ```
