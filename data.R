@@ -67,7 +67,8 @@ rm(all_months_years, current_month, current_year, fn, i, link_to_data, x)
 dailies <- hourlies %>%
   group_by(Theme, Topic, Author, Posted, Link, Interaction, 
            `Extraction Date` = as.Date(Extraction)) %>%
-  filter(Extraction == max(Extraction, na.rm = TRUE))
+  filter(Extraction == max(Extraction, na.rm = TRUE)) %>%
+  ungroup()
 
 ## Process weeklies topics data ------------------------------------------------
   weeklies <- dailies %>%
