@@ -202,26 +202,28 @@ output$posts <- renderPlotly({
       ggplot(mapping = aes(x = Posted, y = n)) +
       geom_col(fill = unicef_blue, colour = unicef_blue, alpha = 0.7) +
       scale_x_date(name = "", 
-                   date_breaks = "1 year") %>%
+                   date_breaks = "1 year",
+                   date_labels = "%b %Y") %>%
       labs(title = "Number of questions posted per day by theme",
            y = "No. of questions posted") +
       facet_wrap(. ~ Theme, ncol = 1, scales = input$scale_options) +
-      unicef_theme +
-      theme(axis.text.x = element_text(size = 8, angle = 90),
-            axis.text.y = element_text(size = 8))
+      unicef_theme
   }
   
+  ## Weekly
   if (input$frequency_options == "Weekly") {
     y <- x %>%
-      mutate(Week = lubridate::isoweek(Posted),
-             Year = lubridate::year(Posted)) %>%
-      arrange(Year, Week) %>%
-      mutate(`Week Year` = paste("Week ", Week, ", ", Year, sep = "")) %>%
-      mutate(`Week Year` = factor(`Week Year`, levels = unique(`Week Year`))) %>%
+      mutate(Week = paste(lubridate::isoyear(Posted),
+                          lubridate::isoweek(Posted),
+                          lubridate::wday(Posted, week_start = 1), sep = "-")) %>%
+      mutate(Week = as.Date(Week, format = "%Y-%V-%u")) %>%
       group_by(Theme) %>%
-      count(`Week Year`) %>%
-      ggplot(mapping = aes(x = `Week Year`, y = n)) +
-      geom_col(fill = unicef_blue, colour = unicef_blue, alpha = 0.7) +
+      count(Week) %>%
+      ggplot(mapping = aes(x = Week, y = n)) +
+      geom_col(fill = unicef_blue, 
+               colour = unicef_blue, 
+               alpha = 0.7) +
+      scale_x_date(date_breaks = "1 year", date_labels = "%V-%Y") +
       labs(title = "Number of questions posted per week by theme",
            y = "No. of questions posted") +
       facet_wrap(. ~ Theme, ncol = 1, scales = input$scale_options) +
@@ -234,37 +236,7 @@ output$posts <- renderPlotly({
     y <- x %>%
       count_topics(by_date = "month_year") %>%
       mutate(`Month Year` = paste(Month, Year, sep = " "),
-             `Month Year` = lubridate::my(`Month Year`))
-  }
-  
-  if (input$frequency_options == "Yearly") {
-    y <- x %>%
-    count_topics(by_date = "year") %>%
-    mutate(`Month Year` = paste(Month, Year, sep = " "),
-           `Month Year` = lubridate::my(`Month Year`))
-  }
-  
-  ggplotly(p = y)
-})
-
-plotlyOutput(outputId = "posts")
-```
-
-
-### Monthly
-
-```{r monthlies}
-output$monthly_topics <- renderPlotly({
-  req(input$themes_options)
-  
-  time_period <- input$year_start:input$year_end
-  
-  z <- topics %>%
-    filter(Theme %in% input$themes_options,
-           lubridate::year(Posted) %in% time_period) %>%
-    count_topics(by_date = "month_year") %>%
-    mutate(`Month Year` = paste(Month, Year, sep = " "),
-           `Month Year` = lubridate::my(`Month Year`)) %>%
+             `Month Year` = lubridate::my(`Month Year`)) %>%
     ggplot(mapping = aes(x = `Month Year`, y = n)) +
     geom_col(fill = unicef_blue, colour = unicef_blue, alpha = 0.7) +
     scale_x_date(name = "", date_breaks = "3 months", date_labels = "%b %Y") +
@@ -274,21 +246,10 @@ output$monthly_topics <- renderPlotly({
     unicef_theme +
     theme(axis.text.x = element_text(size = 8, angle = 90),
           axis.text.y = element_text(size = 8))
-
-  ggplotly(p = z)
-})
-
-plotlyOutput(outputId = "monthly_topics")
-```
-
-### Yearly
-
-```{r yearlies}
-output$yearly_topics <- renderPlotly({
-  req(input$themes_options)
+  }
   
-  z <- topics %>%
-    filter(Theme %in% input$themes_options) %>%
+  if (input$frequency_options == "Yearly") {
+    y <- x %>%
     count_topics(by_date = "year") %>%
     ggplot(mapping = aes(x = Year, y = n)) +
     geom_col(fill = unicef_blue, colour = unicef_blue, alpha = 0.7) +
@@ -297,9 +258,10 @@ output$yearly_topics <- renderPlotly({
          y = "No. of questions posted") +
     facet_wrap(. ~ Theme, ncol = 1, scales = input$scale_options) +
     unicef_theme
+  }
   
-  ggplotly(p = z)
+  ggplotly(p = y)
 })
 
-plotlyOutput(outputId = "yearly_topics")
+plotlyOutput(outputId = "posts")
 ```
