@@ -215,9 +215,7 @@ output$yearly_topics <- renderPlotly({
     labs(title = "Number of questions posted per year by theme",
          y = "No. of questions posted") +
     facet_wrap(. ~ Theme, ncol = 1, scales = input$scale_options) +
-    unicef_theme +
-    theme(axis.text.x = element_text(size = 8, angle = 90),
-          axis.text.y = element_text(size = 8))
+    unicef_theme
   
   ggplotly(p = z)
 })
