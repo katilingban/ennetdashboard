@@ -161,6 +161,16 @@ selectInput(inputId = "year_end",
             selected = max(unique(lubridate::year(topics$Posted))),
             choices = rev(unique(lubridate::year(topics$Posted))))
 
+selectInput(inputId = "frequency_options",
+            label = "Frequency",
+            selected = "Daily",
+            choices = c("Daily", "Weekly", "Monthly", "Yearly"))
+
+#selectInput(inputId = "metric_options",
+#            label = "Metric",
+#            selected = "Posts",
+#            choices = c("Posts", "Views", "Replies"))
+
 selectInput(inputId = "scale_options",
             label = "Scale options",
             selected = "fixed",
@@ -169,6 +179,77 @@ selectInput(inputId = "scale_options",
 
 Row {.tabset .tabset-fade}
 --------------------------------------------------------------------------------
+
+### Posts
+
+```{r posts_output}
+output$posts <- renderPlotly({
+  req(input$themes_options)
+  
+  ## Get time period
+  time_period <- input$year_start:input$year_end
+  
+  ## Filter to specified themes and time period
+  x <- topics %>%
+    filter(Theme %in% input$themes_options,
+           lubridate::year(Posted) %in% time_period)
+  
+  ## Daily
+  if (input$frequency_options == "Daily") {
+    y <- x %>% 
+      group_by(Theme) %>%
+      count(Posted) %>%
+      ggplot(mapping = aes(x = Posted, y = n)) +
+      geom_col(fill = unicef_blue, colour = unicef_blue, alpha = 0.7) +
+      scale_x_date(name = "", 
+                   date_breaks = "1 year") %>%
+      labs(title = "Number of questions posted per day by theme",
+           y = "No. of questions posted") +
+      facet_wrap(. ~ Theme, ncol = 1, scales = input$scale_options) +
+      unicef_theme +
+      theme(axis.text.x = element_text(size = 8, angle = 90),
+            axis.text.y = element_text(size = 8))
+  }
+  
+  if (input$frequency_options == "Weekly") {
+    y <- x %>%
+      mutate(Week = lubridate::isoweek(Posted),
+             Year = lubridate::year(Posted)) %>%
+      arrange(Year, Week) %>%
+      mutate(`Week Year` = paste("Week ", Week, ", ", Year, sep = "")) %>%
+      mutate(`Week Year` = factor(`Week Year`, levels = unique(`Week Year`))) %>%
+      group_by(Theme) %>%
+      count(`Week Year`) %>%
+      ggplot(mapping = aes(x = `Week Year`, y = n)) +
+      geom_col(fill = unicef_blue, colour = unicef_blue, alpha = 0.7) +
+      labs(title = "Number of questions posted per week by theme",
+           y = "No. of questions posted") +
+      facet_wrap(. ~ Theme, ncol = 1, scales = input$scale_options) +
+      unicef_theme +
+      theme(axis.text.x = element_text(size = 8, angle = 90),
+            axis.text.y = element_text(size = 8))
+  }
+  
+  if (input$frequency_options == "Monthly") {
+    y <- x %>%
+      count_topics(by_date = "month_year") %>%
+      mutate(`Month Year` = paste(Month, Year, sep = " "),
+             `Month Year` = lubridate::my(`Month Year`))
+  }
+  
+  if (input$frequency_options == "Yearly") {
+    y <- x %>%
+    count_topics(by_date = "year") %>%
+    mutate(`Month Year` = paste(Month, Year, sep = " "),
+           `Month Year` = lubridate::my(`Month Year`))
+  }
+  
+  ggplotly(p = y)
+})
+
+plotlyOutput(outputId = "posts")
+```
+
 
 ### Monthly
 
