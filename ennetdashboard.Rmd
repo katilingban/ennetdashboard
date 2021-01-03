@@ -11,17 +11,17 @@ output:
 ---
 
 ```{r setup, include = FALSE}
-if(!require(flexdashboard)) install.packages("flexdashboard")
-if(!require(shiny)) install.packages("shiny")
-if(!require(ggplot2)) install.packages("ggplot2")
-if(!require(magrittr)) install.packages("magrittr")
-if(!require(plotly)) install.packages("plotly")
-if(!require(lubridate)) install.packages("lubridate")
-if(!require(leaflet)) install.packages("leaflet")
-if(!require(RColorBrewer)) install.packages("RColorBrewer")
-if(!require(remotes)) install.packages("remotes")
-if(!require(tidyr)) install.packages("tidyr")
-if(!require(ennet)) remotes::install_github(repo = "katilingban/ennet")
+if (!require(flexdashboard)) install.packages("flexdashboard")
+if (!require(shiny)) install.packages("shiny")
+if (!require(ggplot2)) install.packages("ggplot2")
+if (!require(magrittr)) install.packages("magrittr")
+if (!require(plotly)) install.packages("plotly")
+if (!require(lubridate)) install.packages("lubridate")
+if (!require(leaflet)) install.packages("leaflet")
+if (!require(RColorBrewer)) install.packages("RColorBrewer")
+if (!require(remotes)) install.packages("remotes")
+if (!require(tidyr)) install.packages("tidyr")
+if (!require(ennet)) remotes::install_github(repo = "katilingban/ennet")
 
 library(flexdashboard)
 library(shiny)
