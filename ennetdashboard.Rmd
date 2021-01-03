@@ -313,7 +313,7 @@ output$views <- renderPlotly({
 
 plotlyOutput(outputId = "views")
 ```
-
+--->
 
 ### Replies
 
@@ -387,4 +387,4 @@ output$views_charts <- renderPlotly({
 
 plotlyOutput(outputId = "views_charts")
 ```
---->
+
