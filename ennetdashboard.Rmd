@@ -22,7 +22,6 @@ if(!require(RColorBrewer)) install.packages("RColorBrewer")
 if(!require(remotes)) install.packages("remotes")
 if(!require(tidyr)) install.packages("tidyr")
 if(!require(ennet)) remotes::install_github(repo = "katilingban/ennet")
-if(!require(drlib)) remotes::install_github("dgrtwo/drlib")
 
 library(flexdashboard)
 library(shiny)
@@ -35,7 +34,6 @@ library(RColorBrewer)
 library(remotes)
 library(tidyr)
 library(ennet)
-library(drlib)
 
 ## Create Mapbox base layer objects for leaflet mapping
 mapbox.satellite <- "https://api.mapbox.com/styles/v1/mapbox/satellite-streets-v10/tiles/256/{z}/{x}/{y}?access_token=pk.eyJ1IjoiZXJuZXN0Z3VldmFycmEiLCJhIjoiejRRLXlZdyJ9.sqS1zi0rDH5CIzvcn9SXSg"
@@ -211,40 +209,47 @@ output$posts <- renderPlotly({
   ## Weekly
   if (input$frequency_options == "Weekly") {
     y <- x %>%
-      mutate(Week = factor(strftime(Posted, format = "%Y-%V-%u"))) %>%
-      group_by(Theme, Posted, Week) %>%
+      mutate(Week = as.Date(
+        cut(Posted, 
+            breaks = "week", 
+            start.on.monday = FALSE)
+        )) %>%
+      group_by(Theme, Week) %>%
       summarise(n = sum(n), .groups = "drop_last") %>%
-      ggplot(mapping = aes(x = Posted, y = n)) +
+      ggplot(mapping = aes(x = Week, y = n)) +
       geom_col(fill = unicef_blue, 
                colour = unicef_blue, 
                alpha = 0.7) +
       scale_x_date(name = "",
-                   date_breaks = "12 weeks", 
+                   #date_breaks = "4 weeks", 
                    date_labels = "Week %V-%Y") +
       labs(title = "Number of questions posted per week by theme",
            y = "No. of questions posted") +
       facet_wrap(. ~ Theme, ncol = 1, scales = input$scale_options) +
-      unicef_theme +
-      theme(axis.text.x = element_text(size = 8, angle = 90),
-            axis.text.y = element_text(size = 8))
+      unicef_theme #+
+      #theme(axis.text.x = element_text(size = 8, angle = 90),
+      #      axis.text.y = element_text(size = 8))
   }
   
   if (input$frequency_options == "Monthly") {
     y <- x %>%
-      mutate(Month = strftime(x = Posted, format = "%b %Y")) %>%
-      group_by(Theme, Posted, Month) %>%
+      mutate(Month = as.Date(
+        cut(Posted, breaks = "month")
+        )
+      ) %>%
+      group_by(Theme, Month) %>%
       summarise(n = sum(n), .groups = "drop_last") %>%
-      ggplot(mapping = aes(x = Posted, y = n)) +
+      ggplot(mapping = aes(x = Month, y = n)) +
       geom_col(fill = unicef_blue, colour = unicef_blue, alpha = 0.7) +
       scale_x_date(name = "", 
-                   date_breaks = "3 months", 
+                   #date_breaks = "3 months", 
                    date_labels = "%b %Y") +
       labs(title = "Number of questions posted per month by theme",
            y = "No. of questions posted") +
       facet_wrap(. ~ Theme, ncol = 1, scales = input$scale_options) +
-      unicef_theme +
-      theme(axis.text.x = element_text(size = 8, angle = 90),
-            axis.text.y = element_text(size = 8))
+      unicef_theme #+
+      #theme(axis.text.x = element_text(size = 8, angle = 90),
+      #      axis.text.y = element_text(size = 8))
   }
   
   if (input$frequency_options == "Yearly") {
