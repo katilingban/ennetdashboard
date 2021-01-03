@@ -186,16 +186,14 @@ output$posts <- renderPlotly({
   
   ## Tally dailies and then filter to specified themes and time period
   x <- topics %>%
-    group_by(Theme) %>%
-    count(Posted) %>%
-    ungroup() %>%
     filter(Theme %in% input$themes_options,
            lubridate::year(Posted) %in% time_period)
   
   ## Daily
   if (input$frequency_options == "Daily") {
     y <- x %>%
-      ggplot(mapping = aes(x = Posted, y = n)) +
+      count_topics_theme_time(by_time = "day") %>%
+      ggplot(mapping = aes(x = day, y = n)) +
       geom_col(fill = unicef_blue, colour = unicef_blue, alpha = 0.7) +
       scale_x_date(name = "", 
                    date_breaks = "1 month",
@@ -209,14 +207,8 @@ output$posts <- renderPlotly({
   ## Weekly
   if (input$frequency_options == "Weekly") {
     y <- x %>%
-      mutate(Week = as.Date(
-        cut(Posted, 
-            breaks = "week", 
-            start.on.monday = FALSE)
-        )) %>%
-      group_by(Theme, Week) %>%
-      summarise(n = sum(n), .groups = "drop_last") %>%
-      ggplot(mapping = aes(x = Week, y = n)) +
+      count_topics_theme_time(by_time = "week") %>%
+      ggplot(mapping = aes(x = week, y = n)) +
       geom_col(fill = unicef_blue, 
                colour = unicef_blue, 
                alpha = 0.7) +
@@ -233,13 +225,8 @@ output$posts <- renderPlotly({
   
   if (input$frequency_options == "Monthly") {
     y <- x %>%
-      mutate(Month = as.Date(
-        cut(Posted, breaks = "month")
-        )
-      ) %>%
-      group_by(Theme, Month) %>%
-      summarise(n = sum(n), .groups = "drop_last") %>%
-      ggplot(mapping = aes(x = Month, y = n)) +
+      count_topics_theme_time(by_time = "month") %>%
+      ggplot(mapping = aes(x = month, y = n)) +
       geom_col(fill = unicef_blue, colour = unicef_blue, alpha = 0.7) +
       scale_x_date(name = "", 
                    #date_breaks = "3 months", 
@@ -253,13 +240,11 @@ output$posts <- renderPlotly({
   }
   
   if (input$frequency_options == "Yearly") {
-    y <- topics %>%
-      count_topics(by_date = "year") %>%
-      filter(Theme %in% input$themes_options,
-             Year %in% time_period) %>%
-      ggplot(mapping = aes(x = Year, y = n)) +
+    y <- x %>%
+      count_topics_theme_time(by_time = "year") %>%
+      ggplot(mapping = aes(x = year, y = n)) +
       geom_col(fill = unicef_blue, colour = unicef_blue, alpha = 0.7) +
-      scale_x_continuous(name = "", breaks = rev(unique(lubridate::year(topics$Posted)))) +
+      scale_x_date(name = "", date_labels = "%Y") +
       labs(title = "Number of questions posted per year by theme",
            y = "No. of questions posted") +
       facet_wrap(. ~ Theme, ncol = 1, scales = input$scale_options) +
