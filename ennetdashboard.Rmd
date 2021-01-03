@@ -22,6 +22,7 @@ if(!require(RColorBrewer)) install.packages("RColorBrewer")
 if(!require(remotes)) install.packages("remotes")
 if(!require(tidyr)) install.packages("tidyr")
 if(!require(ennet)) remotes::install_github(repo = "katilingban/ennet")
+if(!require(drlib)) install_github("dgrtwo/drlib")
 
 library(flexdashboard)
 library(shiny)
@@ -34,6 +35,7 @@ library(RColorBrewer)
 library(remotes)
 library(tidyr)
 library(ennet)
+library(drlib)
 
 ## Create Mapbox base layer objects for leaflet mapping
 mapbox.satellite <- "https://api.mapbox.com/styles/v1/mapbox/satellite-streets-v10/tiles/256/{z}/{x}/{y}?access_token=pk.eyJ1IjoiZXJuZXN0Z3VldmFycmEiLCJhIjoiejRRLXlZdyJ9.sqS1zi0rDH5CIzvcn9SXSg"
@@ -142,7 +144,7 @@ Overview
 Inputs {.sidebar}
 --------------------------------------------------------------------------------
 
-```{r filters}
+```{r filters1}
 h4("Filters")
 
 selectInput(inputId = "themes_options",
@@ -165,11 +167,6 @@ selectInput(inputId = "frequency_options",
             label = "Frequency",
             selected = "Daily",
             choices = c("Daily", "Weekly", "Monthly", "Yearly"))
-
-#selectInput(inputId = "metric_options",
-#            label = "Metric",
-#            selected = "Posts",
-#            choices = c("Posts", "Views", "Replies"))
 
 selectInput(inputId = "scale_options",
             label = "Scale options",
@@ -324,3 +321,71 @@ plotlyOutput(outputId = "views")
 
 ```
 --->
+
+Top of the Charts
+================================================================================
+
+Inputs {.sidebar}
+--------------------------------------------------------------------------------
+
+```{r filters2}
+h4("Filters")
+
+selectInput(inputId = "themes_choices",
+            label = "Themes",
+            choices = themes,
+            selected = themes[1])
+
+selectInput(inputId = "year_first",
+            label = "From",
+            selected = min(unique(lubridate::year(topics$Posted))),
+            choices = rev(unique(lubridate::year(topics$Posted))))
+
+selectInput(inputId = "year_last",
+            label = "To",
+            selected = max(unique(lubridate::year(topics$Posted))),
+            choices = rev(unique(lubridate::year(topics$Posted))))
+
+selectInput(inputId = "frequency_choices",
+            label = "Frequency",
+            selected = "Overall",
+            #choices = c("Daily", "Weekly", "Monthly", "Yearly"))
+            choices = "Overall")
+
+selectInput(inputId = "scale_choices",
+            label = "Scale options",
+            selected = "fixed",
+            choices = c("fixed", "free", "free_x", "free_y"))
+```
+
+Row {.tabset .tabset-fade}
+--------------------------------------------------------------------------------
+
+### Views
+
+```{r views_charts}
+output$views_charts <- renderPlotly({
+  req(input$themes_choices)
+  
+  x <- topics %>%
+    filter(Theme == input$themes_choices)
+  
+  y <- x %>%
+    #group_by(Theme) %>%
+    mutate(Topic = lapply(X = Topic, 
+                          FUN = function(x) paste(strwrap(x, width = 40), collapse = "\n")) %>%
+             unlist()) %>%
+    mutate(Topic = reorder_within(Topic, Views, Theme)) %>%
+    head(10) %>%
+    ggplot(mapping = aes(x = Topic, y = Views, group = Theme)) +
+    geom_col(fill = unicef_blue, colour = unicef_blue, alpha = 0.7) +
+    coord_flip() +
+    scale_x_reordered() +
+    unicef_theme
+  
+  ggplotly(p = y)
+})
+
+plotlyOutput(outputId = "views_charts")
+```
+
