@@ -8,6 +8,7 @@
 [![Project Status: Active – The project has reached a stable, usable
 state and is being actively
 developed.](https://www.repostatus.org/badges/latest/active.svg)](https://www.repostatus.org/#active)
+[![](https://img.shields.io/badge/license-GPLv3-blue)](https://github.com/katilingban/ennetdashboard/blob/master/LICENSE.md)
 [![shinyapps](https://github.com/katilingban/ennetdashboard/workflows/shinyapps/badge.svg)](https://github.com/katilingban/ennetdashboard/actions?query=workflow%3Ashinyapps)
 <!-- badges: end -->
 
