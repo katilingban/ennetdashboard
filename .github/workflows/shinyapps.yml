@@ -36,6 +36,7 @@ jobs:
                              "plotly", "lubridate", "leaflet", "RColorBrewer", 
                              "rsconnect", "remotes"))
           remotes::install_github("katilingban/ennet")
+          remotes::install_github("dgrtwo/drlib")
         shell: Rscript {0}
         
       - name: Configure shinyapps.io account

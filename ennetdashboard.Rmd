@@ -314,7 +314,6 @@ output$views <- renderPlotly({
 plotlyOutput(outputId = "views")
 ```
 
-
 ### Replies
 
 ```{r replies_outputs}
