@@ -22,7 +22,7 @@ if(!require(RColorBrewer)) install.packages("RColorBrewer")
 if(!require(remotes)) install.packages("remotes")
 if(!require(tidyr)) install.packages("tidyr")
 if(!require(ennet)) remotes::install_github(repo = "katilingban/ennet")
-if(!require(drlib)) install_github("dgrtwo/drlib")
+if(!require(drlib)) remotes::install_github("dgrtwo/drlib")
 
 library(flexdashboard)
 library(shiny)
