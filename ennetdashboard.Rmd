@@ -320,7 +320,6 @@ plotlyOutput(outputId = "views")
 ```{r replies_outputs}
 
 ```
---->
 
 Top of the Charts
 ================================================================================
@@ -388,4 +387,4 @@ output$views_charts <- renderPlotly({
 
 plotlyOutput(outputId = "views_charts")
 ```
-
+--->
