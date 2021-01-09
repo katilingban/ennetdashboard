@@ -21,7 +21,7 @@ if (!require(leaflet)) install.packages("leaflet")
 if (!require(RColorBrewer)) install.packages("RColorBrewer")
 if (!require(remotes)) install.packages("remotes")
 if (!require(tidyr)) install.packages("tidyr")
-if (!require(ennet)) remotes::install_github(repo = "katilingban/ennet", force = TRUE)
+if (!require(ennet)) remotes::install_github(repo = "katilingban/ennet")
 
 library(flexdashboard)
 library(shiny)
@@ -63,7 +63,8 @@ unicef_darkblue  <- "#374EA2"
 
 ## UNICEF ggplot theme settings
 unicef_theme <- theme_bw() +
-  theme(plot.title = element_text(size = 16, colour = unicef_darkblue),
+  theme(text = element_text(family = "Helvetica"),
+        plot.title = element_text(size = 16, colour = unicef_darkblue),
         plot.subtitle = element_text(size = 14, colour = unicef_blue),
         panel.border = element_rect(colour = unicef_darkblue,
                                     size = 0.5),
@@ -196,9 +197,10 @@ output$posts <- renderPlotly({
       ggplot(mapping = aes(x = day, y = n)) +
       geom_col(fill = unicef_blue, colour = unicef_blue, alpha = 0.7) +
       scale_x_date(name = "", 
-                   date_breaks = "1 month",
+                   #date_breaks = "1 month",
                    date_labels = "%b %Y") %>%
       labs(title = "Number of questions posted per day by theme",
+           x = "",
            y = "No. of questions posted") +
       facet_wrap(. ~ Theme, ncol = 1, scales = input$scale_options) +
       unicef_theme
@@ -216,6 +218,7 @@ output$posts <- renderPlotly({
                    #date_breaks = "4 weeks", 
                    date_labels = "Week %V-%Y") +
       labs(title = "Number of questions posted per week by theme",
+           x = "",
            y = "No. of questions posted") +
       facet_wrap(. ~ Theme, ncol = 1, scales = input$scale_options) +
       unicef_theme #+
@@ -232,6 +235,7 @@ output$posts <- renderPlotly({
                    #date_breaks = "3 months", 
                    date_labels = "%b %Y") +
       labs(title = "Number of questions posted per month by theme",
+           x = "",
            y = "No. of questions posted") +
       facet_wrap(. ~ Theme, ncol = 1, scales = input$scale_options) +
       unicef_theme #+
@@ -246,6 +250,7 @@ output$posts <- renderPlotly({
       geom_col(fill = unicef_blue, colour = unicef_blue, alpha = 0.7) +
       scale_x_date(name = "", date_labels = "%Y") +
       labs(title = "Number of questions posted per year by theme",
+           x = "",
            y = "No. of questions posted") +
       facet_wrap(. ~ Theme, ncol = 1, scales = input$scale_options) +
       unicef_theme
@@ -257,7 +262,6 @@ output$posts <- renderPlotly({
 plotlyOutput(outputId = "posts")
 ```
 
-<!---
 ### Views
 
 ```{r views_outputs}
@@ -376,4 +380,4 @@ output$views_charts <- renderPlotly({
 
 plotlyOutput(outputId = "views_charts")
 ```
---->
+

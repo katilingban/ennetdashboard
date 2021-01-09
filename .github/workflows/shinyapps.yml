@@ -37,7 +37,7 @@ jobs:
                              "ggplot2", "plotly", "tidyr",
                              "plotly", "lubridate", "leaflet", "RColorBrewer", 
                              "rsconnect", "remotes"))
-          remotes::install_github("katilingban/ennet", force = TRUE)
+          remotes::install_github("katilingban/ennet")
         shell: Rscript {0}
         
       - name: Configure shinyapps.io account
