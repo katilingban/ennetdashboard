@@ -275,29 +275,39 @@ output$views <- renderPlotly({
   x <- dailies %>%
     group_by(Theme, Interaction, `Extraction Date`) %>%
     count(Posted, name = "nPosts") %>%
-    summarise(nPosts = sum(nPosts), .groups = "drop")
-  
+    summarise(nPosts = sum(nPosts), .groups = "drop") %>%
+    pivot_wider(names_from = Interaction, values_from = nPosts) %>%
+    select(Theme:Replies) %>%
+    rename(nPosts = Replies)
+    
   y <- dailies %>%
     group_by(Theme, Interaction, `Extraction Date`, .add = TRUE) %>%
     summarise(nInteractions = sum(n), .groups = "drop") %>%
-    full_join(x)
+    pivot_wider(names_from = Interaction, values_from = nInteractions) %>%
+    group_by(Theme) %>%
+    mutate(`New Replies` = c(0, diff(Replies, 1)),
+           `New Views` = c(0, diff(Views, 1))) %>%
+    full_join(x) %>%
+    ungroup()
 
   if (input$frequency_options == "Daily") {
     z <- y %>%
       filter(Theme %in% input$themes_options,
-             Interaction == "Views",
              lubridate::year(`Extraction Date`) %in% time_period) %>%
-      group_by(Theme, Interaction, `Extraction Date`) %>%
-      mutate(`Views per post per day` = nInteractions / nPosts) %>%
+      group_by(Theme, `Extraction Date`) %>%
+      mutate(`Total views per post per day` = Views / nPosts,
+             `Total replies per post per day` = Replies / nPosts,
+             `New views per post per day` = `New Views` / nPosts,
+             `New replies per post per day` = `New Replies` / nPosts) %>%
       ggplot(mapping = aes(x = `Extraction Date`, 
-                           y = `Views per post per day`)) +
-      #geom_col(fill = unicef_blue, colour = unicef_blue, alpha = 0.7) +
+                           y = `New views per post per day`)) +
       geom_line(colour = unicef_blue, size = 1, alpha = 0.7) +
       scale_x_date(name = "", 
                    date_breaks = "1 month",
                    date_labels = "%b %Y") %>%
-      labs(title = "Number of views per post per day by theme",
-           y = "No. of views", x = "") +
+      labs(title = "New views per post per day by theme",
+           x = "",
+           y = "No. of new views") +
       facet_wrap(. ~ Theme, ncol = 1, scales = input$scale_options) +
       unicef_theme
   }
@@ -311,9 +321,60 @@ plotlyOutput(outputId = "views")
 ### Replies
 
 ```{r replies_outputs}
+output$replies <- renderPlotly({
+  req(input$themes_options)
+  
+  ## Get time period
+  time_period <- input$year_start:input$year_end
+  
+  ## Tally dailies to get nInteractions and nPosts
+  x <- dailies %>%
+    group_by(Theme, Interaction, `Extraction Date`) %>%
+    count(Posted, name = "nPosts") %>%
+    summarise(nPosts = sum(nPosts), .groups = "drop") %>%
+    pivot_wider(names_from = Interaction, values_from = nPosts) %>%
+    select(Theme:Replies) %>%
+    rename(nPosts = Replies)
+    
+  y <- dailies %>%
+    group_by(Theme, Interaction, `Extraction Date`, .add = TRUE) %>%
+    summarise(nInteractions = sum(n), .groups = "drop") %>%
+    pivot_wider(names_from = Interaction, values_from = nInteractions) %>%
+    group_by(Theme) %>%
+    mutate(`New Replies` = c(0, diff(Replies, 1)),
+           `New Views` = c(0, diff(Views, 1))) %>%
+    full_join(x) %>%
+    ungroup()
 
+  if (input$frequency_options == "Daily") {
+    z <- y %>%
+      filter(Theme %in% input$themes_options,
+             lubridate::year(`Extraction Date`) %in% time_period) %>%
+      group_by(Theme, `Extraction Date`) %>%
+      mutate(`Total views per post per day` = Views / nPosts,
+             `Total replies per post per day` = Replies / nPosts,
+             `New views per post per day` = `New Views` / nPosts,
+             `New replies per post per day` = `New Replies` / nPosts) %>%
+      ggplot(mapping = aes(x = `Extraction Date`, 
+                           y = `New replies per post per day`)) +
+      geom_line(colour = unicef_blue, size = 1, alpha = 0.7) +
+      scale_x_date(name = "", 
+                   date_breaks = "1 month",
+                   date_labels = "%b %Y") %>%
+      labs(title = "New replies per post per day by theme",
+           x = "",
+           y = "No. of new replies") +
+      facet_wrap(. ~ Theme, ncol = 1, scales = input$scale_options) +
+      unicef_theme
+  }
+  
+  ggplotly(p = z)
+})
+
+plotlyOutput(outputId = "replies")
 ```
 
+<!---
 Top of the Charts
 ================================================================================
 
@@ -380,4 +441,4 @@ output$views_charts <- renderPlotly({
 
 plotlyOutput(outputId = "views_charts")
 ```
-
+--->
