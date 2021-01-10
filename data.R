@@ -50,7 +50,8 @@ for (i in fn) {
                           names_to = c("Interaction", "Extraction"),
                           names_sep = " ",
                           values_to = "n") %>%
-      mutate(Extraction = lubridate::ymd_hms(Extraction))
+      mutate(Extraction = lubridate::ymd_hms(Extraction)) #%>%
+      #tidyr::pivot_wider(names_from = Interaction, values_from = n)
     
     ##
     hourlies <- rbind(hourlies, x)
@@ -58,28 +59,32 @@ for (i in fn) {
 }
 
 ## Convert to tibble
-hourlies <- tibble::tibble(hourlies)
+hourlies <- tibble::tibble(hourlies) #%>%
+  #group_by(Theme, Topic) %>%
+  #mutate(`New Views` = c(0, diff(Views, 1)),
+  #       `New Replies` = c(0, diff(Replies, 1)),
+  #       `New Replies` = ifelse(is.na(`New Replies`), 0, `New Replies`))
 
 ## clean-up 
 rm(all_months_years, current_month, current_year, fn, i, link_to_data, x)
 
 ## Process dailies topics data -------------------------------------------------
 dailies <- hourlies %>%
-  group_by(Theme, Topic, Author, Posted, Link, Interaction, 
+  group_by(Theme, Topic, Author, Posted, Link, Interaction,
            `Extraction Date` = as.Date(Extraction)) %>%
   filter(Extraction == max(Extraction, na.rm = TRUE)) %>%
   ungroup()
 
 ## Process weeklies topics data ------------------------------------------------
 weeklies <- dailies %>%
-  group_by(Theme, Topic, Author, Posted, Link, Interaction, 
+  group_by(Theme, Topic, Author, Posted, Link, Interaction,
            `Extraction Week` = lubridate::isoweek(`Extraction Date`)) %>%
   filter(Extraction == max(Extraction, na.rm = TRUE)) %>%
   ungroup()
 
 ## Process monthlies topics data -----------------------------------------------
 monthlies <- dailies %>%
-  group_by(Theme, Topic, Author, Posted, Link, Interaction, 
+  group_by(Theme, Topic, Author, Posted, Link, Interaction,
            `Extraction Month` = lubridate::month(`Extraction Date`)) %>%
   filter(Extraction == max(Extraction, na.rm = TRUE)) %>%
   ungroup()
