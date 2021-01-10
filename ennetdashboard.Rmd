@@ -296,9 +296,9 @@ output$views <- renderPlotly({
              lubridate::year(`Extraction Date`) %in% time_period) %>%
       group_by(Theme, `Extraction Date`) %>%
       mutate(`Total views per post per day` = Views / nPosts,
-             `Total replies per post per day` = Replies / nPosts,
+             `Total replies per view per day` = Replies / Views,
              `New views per post per day` = `New Views` / nPosts,
-             `New replies per post per day` = `New Replies` / nPosts) %>%
+             `New replies per new view per day` = `New Replies` / `New Views`) %>%
       ggplot(mapping = aes(x = `Extraction Date`, 
                            y = `New views per post per day`)) +
       geom_line(colour = unicef_blue, size = 1, alpha = 0.7) +
@@ -352,16 +352,16 @@ output$replies <- renderPlotly({
              lubridate::year(`Extraction Date`) %in% time_period) %>%
       group_by(Theme, `Extraction Date`) %>%
       mutate(`Total views per post per day` = Views / nPosts,
-             `Total replies per post per day` = Replies / nPosts,
+             `Total replies per view per day` = Replies / Views,
              `New views per post per day` = `New Views` / nPosts,
-             `New replies per post per day` = `New Replies` / nPosts) %>%
+             `New replies per new view per day` = `New Replies` / `New Views`) %>%
       ggplot(mapping = aes(x = `Extraction Date`, 
-                           y = `New replies per post per day`)) +
+                           y = `New replies per new view per day`)) +
       geom_line(colour = unicef_blue, size = 1, alpha = 0.7) +
       scale_x_date(name = "", 
                    date_breaks = "1 month",
                    date_labels = "%b %Y") %>%
-      labs(title = "New replies per post per day by theme",
+      labs(title = "New replies per new view per day by theme",
            x = "",
            y = "No. of new replies") +
       facet_wrap(. ~ Theme, ncol = 1, scales = input$scale_options) +
