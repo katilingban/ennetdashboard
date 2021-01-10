@@ -59,11 +59,8 @@ for (i in fn) {
 }
 
 ## Convert to tibble
-hourlies <- tibble::tibble(hourlies) #%>%
-  #group_by(Theme, Topic) %>%
-  #mutate(`New Views` = c(0, diff(Views, 1)),
-  #       `New Replies` = c(0, diff(Replies, 1)),
-  #       `New Replies` = ifelse(is.na(`New Replies`), 0, `New Replies`))
+hourlies <- tibble::tibble(hourlies) %>%
+  mutate(n = ifelse(is.na(n), 0, n))
 
 ## clean-up 
 rm(all_months_years, current_month, current_year, fn, i, link_to_data, x)
@@ -75,18 +72,114 @@ dailies <- hourlies %>%
   filter(Extraction == max(Extraction, na.rm = TRUE)) %>%
   ungroup()
 
+## Tally daily views
+x <- dailies %>%
+  group_by(Theme, Interaction, `Extraction Date`) %>%
+  count(Posted, name = "nPosts") %>%
+  summarise(nPosts = sum(nPosts), .groups = "drop") %>%
+  pivot_wider(names_from = Interaction, values_from = nPosts) %>%
+  select(Theme:Replies) %>%
+  rename(nPosts = Replies)
+
+daily_interactions <- dailies %>%
+  group_by(Theme, Interaction, `Extraction Date`, .add = TRUE) %>%
+  summarise(nInteractions = sum(n), .groups = "drop") %>%
+  pivot_wider(names_from = Interaction, values_from = nInteractions) %>%
+  group_by(Theme) %>%
+  mutate(`New Replies` = c(0, diff(Replies, 1)),
+         `New Views` = c(0, diff(Views, 1))) %>%
+  full_join(x) %>%
+  ungroup()
+  
 ## Process weeklies topics data ------------------------------------------------
 weeklies <- dailies %>%
   group_by(Theme, Topic, Author, Posted, Link, Interaction,
-           `Extraction Week` = lubridate::isoweek(`Extraction Date`)) %>%
+           `Extraction Week` = cut(`Extraction Date`, 
+                                   breaks = "1 week", 
+                                   start.on.monday = FALSE) %>%
+             as.Date()) %>%
   filter(Extraction == max(Extraction, na.rm = TRUE)) %>%
+  ungroup()
+
+## Tally weekly views
+x <- dailies %>%
+  group_by(Theme, Interaction, 
+           `Extraction Week` = cut(`Extraction Date`, 
+                                   breaks = "1 week", 
+                                   start.on.monday = FALSE) %>%
+             as.Date()) %>%
+  count(Posted, name = "nPosts") %>%
+  summarise(nPosts = sum(nPosts), .groups = "drop") %>%
+  pivot_wider(names_from = Interaction, values_from = nPosts) %>%
+  select(Theme:Replies) %>%
+  rename(nPosts = Replies)
+
+weekly_interactions <- weeklies %>%
+  group_by(Theme, Interaction, `Extraction Week`, .add = TRUE) %>%
+  summarise(nInteractions = sum(n), .groups = "drop") %>%
+  pivot_wider(names_from = Interaction, values_from = nInteractions) %>%
+  group_by(Theme) %>%
+  mutate(`New Replies` = c(0, diff(Replies, 1)),
+         `New Views` = c(0, diff(Views, 1))) %>%
+  full_join(x) %>%
   ungroup()
 
 ## Process monthlies topics data -----------------------------------------------
 monthlies <- dailies %>%
   group_by(Theme, Topic, Author, Posted, Link, Interaction,
-           `Extraction Month` = lubridate::month(`Extraction Date`)) %>%
+           `Extraction Month` = cut(`Extraction Date`, breaks = "1 month") %>%
+             as.Date()) %>%
   filter(Extraction == max(Extraction, na.rm = TRUE)) %>%
   ungroup()
 
+## Tally monthly views
+x <- dailies %>%
+  group_by(Theme, Interaction, 
+           `Extraction Month` = cut(`Extraction Date`, 
+                                    breaks = "1 month") %>%
+             as.Date()) %>%
+  count(Posted, name = "nPosts") %>%
+  summarise(nPosts = sum(nPosts), .groups = "drop") %>%
+  pivot_wider(names_from = Interaction, values_from = nPosts) %>%
+  select(Theme:Replies) %>%
+  rename(nPosts = Replies)
 
+monthly_interactions <- monthlies %>%
+  group_by(Theme, Interaction, `Extraction Month`, .add = TRUE) %>%
+  summarise(nInteractions = sum(n), .groups = "drop") %>%
+  pivot_wider(names_from = Interaction, values_from = nInteractions) %>%
+  group_by(Theme) %>%
+  mutate(`New Replies` = c(0, diff(Replies, 1)),
+         `New Views` = c(0, diff(Views, 1))) %>%
+  full_join(x) %>%
+  ungroup()
+
+## Process yearlies topics data ------------------------------------------------
+yearlies <- dailies %>%
+  group_by(Theme, Topic, Author, Posted, Link, Interaction,
+           `Extraction Year` = cut(`Extraction Date`, breaks = "1 year") %>%
+             as.Date()) %>%
+  filter(Extraction == max(Extraction, na.rm = TRUE)) %>%
+  ungroup()
+
+## Tally monthly views
+x <- yearlies %>%
+  group_by(Theme, Interaction, 
+           `Extraction Year` = cut(`Extraction Date`, 
+                                    breaks = "1 year") %>%
+             as.Date()) %>%
+  count(Posted, name = "nPosts") %>%
+  summarise(nPosts = sum(nPosts), .groups = "drop") %>%
+  pivot_wider(names_from = Interaction, values_from = nPosts) %>%
+  select(Theme:Replies) %>%
+  rename(nPosts = Replies)
+
+yearly_interactions <- yearlies %>%
+  group_by(Theme, Interaction, `Extraction Year`, .add = TRUE) %>%
+  summarise(nInteractions = sum(n), .groups = "drop") %>%
+  pivot_wider(names_from = Interaction, values_from = nInteractions) %>%
+  group_by(Theme) %>%
+  mutate(`New Replies` = c(0, diff(Replies, 1)),
+         `New Views` = c(0, diff(Views, 1))) %>%
+  full_join(x) %>%
+  ungroup()
