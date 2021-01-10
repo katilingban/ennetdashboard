@@ -298,7 +298,7 @@ output$views <- renderPlotly({
       mutate(`Total views per post per day` = Views / nPosts,
              `Total replies per view per day` = Replies / Views,
              `New views per post per day` = `New Views` / nPosts,
-             `New replies per new view per day` = `New Replies` / `New Views`) %>%
+             `New replies per view per day` = `New Replies` / Views) %>%
       ggplot(mapping = aes(x = `Extraction Date`, 
                            y = `New views per post per day`)) +
       geom_line(colour = unicef_blue, size = 1, alpha = 0.7) +
@@ -354,9 +354,9 @@ output$replies <- renderPlotly({
       mutate(`Total views per post per day` = Views / nPosts,
              `Total replies per view per day` = Replies / Views,
              `New views per post per day` = `New Views` / nPosts,
-             `New replies per new view per day` = `New Replies` / `New Views`) %>%
+             `New replies per view per day` = `New Replies` / Views) %>%
       ggplot(mapping = aes(x = `Extraction Date`, 
-                           y = `New replies per new view per day`)) +
+                           y = `New replies per view per day`)) +
       geom_line(colour = unicef_blue, size = 1, alpha = 0.7) +
       scale_x_date(name = "", 
                    date_breaks = "1 month",
