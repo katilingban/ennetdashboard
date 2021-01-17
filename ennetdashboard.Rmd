@@ -481,10 +481,10 @@ selectInput(inputId = "frequency_choices",
             selected = "Weekly",
             choices = c("Weekly", "Monthly", "Yearly"))
 
-selectInput(inputId = "scale_choices",
-            label = "Scale options",
-            selected = "fixed",
-            choices = c("fixed", "free", "free_x", "free_y"))
+#selectInput(inputId = "scale_choices",
+#            label = "Scale options",
+#            selected = "fixed",
+#            choices = c("fixed", "free", "free_x", "free_y"))
 ```
 
 Row {.tabset .tabset-fade}
@@ -521,7 +521,7 @@ output$posts_charts <- renderPlotly({
     geom_col(fill = unicef_blue, colour = unicef_blue, alpha = 0.7) +
     labs(title = paste("Period from ", min(frequency_period), " to ", 
                        max(frequency_period), sep = ""),
-         x = "", y = "") +
+         x = "", y = "Number of posts") +
     coord_flip() +
     unicef_theme
            
@@ -576,7 +576,7 @@ output$views_charts <- renderPlotly({
     geom_col(fill = unicef_blue, colour = unicef_blue, alpha = 0.7) +
     labs(title = paste("Period from ", min(frequency_period), 
                        " to ", max(frequency_period), sep = ""),
-         x = "", y = "") +
+         x = "", y = "Total views per post") +
     coord_flip() +
     unicef_theme
   
@@ -584,4 +584,60 @@ output$views_charts <- renderPlotly({
 })
   
 plotlyOutput(outputId = "views_charts")
+```
+
+### Replies
+
+```{r replies_charts}
+output$replies_charts <- renderPlotly({
+
+  x <- topics %>%
+    group_by(Theme, Posted) %>%
+    summarise(`Total views` = sum(Views),
+              `Total replies` = sum(Replies)) %>%
+    ungroup() %>%
+    rename(day = Posted)
+  
+  y <- topics %>%
+    count_topics_theme_time(by_time = "day") %>%
+    left_join(x, by = c("Theme", "day"))
+    
+  if (input$frequency_choices == "Weekly") {
+    frequency_period <- seq(from = Sys.Date() - 7, 
+                            to = Sys.Date(), 
+                            by = 1)
+  }
+  
+  if (input$frequency_choices == "Monthly") {
+    frequency_period <- seq(from = Sys.Date() - 30, 
+                            to = Sys.Date(), 
+                            by = 1)
+  }
+  
+  if (input$frequency_choices == "Yearly") {
+    frequency_period <- seq(from = Sys.Date() - 365, 
+                            to = Sys.Date(), 
+                            by = 1)
+  }
+  
+  z <- y %>%
+    filter(day %in% frequency_period) %>%
+    group_by(Theme) %>%
+    summarise(`Total replies` = sum(`Total replies`),
+              `Total views` = sum(`Total views`),
+              `Total replies per view` = `Total replies` / `Total views`) %>%
+    mutate(Theme = reorder(Theme, -`Total replies per view`)) %>%
+    ggplot(mapping = aes(x = Theme,
+                         y = `Total replies per view`)) +
+    geom_col(fill = unicef_blue, colour = unicef_blue, alpha = 0.7) +
+    labs(title = paste("Period from ", min(frequency_period), 
+                       " to ", max(frequency_period), sep = ""),
+         x = "", y = "Total replies per view") +
+    coord_flip() +
+    unicef_theme
+  
+  ggplotly(p = z)
+})
+  
+plotlyOutput(outputId = "replies_charts")
 ```
