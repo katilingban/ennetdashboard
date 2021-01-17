@@ -9,11 +9,12 @@ library(ennet)
 ## Read discussions data -------------------------------------------------------
 
 ## Read discussions dataset
-gh_data <- "https://github.com/katilingban/ennet_db/blob/main/data/"
-link_to_data <- paste(gh_data, "ennet_discussions.csv?raw=TRUE", sep = "")
+#gh_data <- "https://github.com/katilingban/ennet_db/blob/main/data/"
+#link_to_data <- paste(gh_data, "ennet_discussions.csv?raw=TRUE", sep = "")
 
-discussions <- read.csv(link_to_data)
-discussions <- tibble::tibble(discussions)
+#discussions <- read.csv(link_to_data)
+#discussions <- tibble::tibble(discussions)
+discussions <- get_db_discussions()
 
 ## Get themes data -------------------------------------------------------------
 themes <- get_themes()$themes
@@ -22,6 +23,7 @@ themes <- get_themes()$themes
 topics <- get_themes_topics()
 
 ## Read hourlies topics data ---------------------------------------------------
+gh_data <- "https://github.com/katilingban/ennet_db/blob/main/data/"
 current_year <- Sys.Date() %>% lubridate::year()
 current_month <- Sys.Date() %>% lubridate::month()
 
@@ -59,11 +61,11 @@ for (i in fn) {
 }
 
 ## Convert to tibble
-hourlies <- tibble::tibble(hourlies) %>%
+hourlies <- hourlies %>%
   mutate(n = ifelse(is.na(n), 0, n))
 
 ## clean-up 
-rm(all_months_years, current_month, current_year, fn, i, link_to_data, x)
+rm(all_months_years, current_month, current_year, fn, i, x)
 
 ## Process dailies topics data -------------------------------------------------
 dailies <- hourlies %>%
