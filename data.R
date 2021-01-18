@@ -9,11 +9,6 @@ library(ennet)
 ## Read discussions data -------------------------------------------------------
 
 ## Read discussions dataset
-#gh_data <- "https://github.com/katilingban/ennet_db/blob/main/data/"
-#link_to_data <- paste(gh_data, "ennet_discussions.csv?raw=TRUE", sep = "")
-
-#discussions <- read.csv(link_to_data)
-#discussions <- tibble::tibble(discussions)
 discussions <- get_db_discussions()
 
 ## Get themes data -------------------------------------------------------------
