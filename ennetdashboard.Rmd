@@ -11,18 +11,7 @@ output:
 ---
 
 ```{r setup, include = FALSE}
-if (!require(flexdashboard)) install.packages("flexdashboard")
-if (!require(shiny)) install.packages("shiny")
-if (!require(ggplot2)) install.packages("ggplot2")
-if (!require(magrittr)) install.packages("magrittr")
-if (!require(plotly)) install.packages("plotly")
-if (!require(lubridate)) install.packages("lubridate")
-if (!require(leaflet)) install.packages("leaflet")
-if (!require(RColorBrewer)) install.packages("RColorBrewer")
-if (!require(remotes)) install.packages("remotes")
-if (!require(tidyr)) install.packages("tidyr")
-if (!require(ennet)) remotes::install_github(repo = "katilingban/ennet")
-
+## Libraries -------------------------------------------------------------------
 library(flexdashboard)
 library(shiny)
 library(ggplot2)
@@ -32,10 +21,11 @@ library(lubridate)
 library(leaflet)
 library(RColorBrewer)
 library(remotes)
+library(dplyr)
 library(tidyr)
 library(ennet)
 
-## Create Mapbox base layer objects for leaflet mapping
+## Create Mapbox base layer objects for leaflet mapping ------------------------
 mapbox.satellite <- "https://api.mapbox.com/styles/v1/mapbox/satellite-streets-v10/tiles/256/{z}/{x}/{y}?access_token=pk.eyJ1IjoiZXJuZXN0Z3VldmFycmEiLCJhIjoiejRRLXlZdyJ9.sqS1zi0rDH5CIzvcn9SXSg"
 mapbox.street    <- "https://api.mapbox.com/styles/v1/mapbox/streets-v10/tiles/256/{z}/{x}/{y}?access_token=pk.eyJ1IjoiZXJuZXN0Z3VldmFycmEiLCJhIjoiejRRLXlZdyJ9.sqS1zi0rDH5CIzvcn9SXSg"
 mapbox.dark      <- "https://api.mapbox.com/styles/v1/mapbox/dark-v9/tiles/256/{z}/{x}/{y}?access_token=pk.eyJ1IjoiZXJuZXN0Z3VldmFycmEiLCJhIjoiejRRLXlZdyJ9.sqS1zi0rDH5CIzvcn9SXSg"
@@ -47,7 +37,7 @@ mapbox.decimal   <- "https://api.mapbox.com/styles/v1/ernestguevarra/cj5ms1akt3p
 mapbox.terminal  <- "https://api.mapbox.com/styles/v1/ernestguevarra/cj6g0tzbd30kc2sph2wyh666m/tiles/256/{z}/{x}/{y}?access_token=pk.eyJ1IjoiZXJuZXN0Z3VldmFycmEiLCJhIjoiejRRLXlZdyJ9.sqS1zi0rDH5CIzvcn9SXSg"
 mapbox.leshine  <- "https://api.mapbox.com/styles/v1/ernestguevarra/cjdlr8pvl0xiv2sqvq1evk1pl/tiles/256/{z}/{x}/{y}?access_token=pk.eyJ1IjoiZXJuZXN0Z3VldmFycmEiLCJhIjoiejRRLXlZdyJ9.sqS1zi0rDH5CIzvcn9SXSg"
 
-## Load UNICEF palette
+## Load UNICEF palette ---------------------------------------------------------
 unicef_blue      <- "#1CABE2"
 unicef_darkgreen <- "#00833D"
 unicef_green     <- "#80BD41"
@@ -61,7 +51,7 @@ unicef_coolgrey  <- "#777779"
 unicef_black     <- "#2D2926"
 unicef_darkblue  <- "#374EA2"
 
-## UNICEF ggplot theme settings
+## UNICEF ggplot theme settings ------------------------------------------------
 unicef_theme <- theme_bw() +
   theme(text = element_text(family = "Helvetica"),
         plot.title = element_text(size = 16, colour = unicef_darkblue),
@@ -72,7 +62,10 @@ unicef_theme <- theme_bw() +
         panel.grid.minor = element_line(linetype = 0),
         strip.background = element_rect(colour = unicef_darkblue,
                                         fill = unicef_darkblue),
-        strip.text = element_text(face = "bold", colour = "white", size = 10, vjust = 1),
+        strip.text = element_text(face = "bold", 
+                                  colour = "white", 
+                                  size = 10, 
+                                  vjust = 1),
         legend.background = element_rect(colour = NA, fill = NA),
         legend.key = element_rect(linetype = 0),
         legend.key.size = unit(x = 8, units = "points"),
@@ -86,55 +79,28 @@ unicef_theme <- theme_bw() +
         axis.title.y = element_text(size = 12, colour = unicef_blue),
         axis.ticks = element_line(colour = unicef_darkblue, size = 0.25))
 
-## Katilingban theme
-katilingban_theme <- theme_bw() +
-  theme(panel.border = element_rect(colour = "gray50",
-                                    size = 0.5),
-        panel.grid.major = element_line(linetype = 1,
-                                        size = 0.1,
-                                        colour = "gray90"),
-        panel.grid.minor = element_line(linetype = 0),
-        strip.background = element_rect(colour = "gray50",
-                                        fill = "gray70"),
-        strip.text = element_text(colour = "white", size = 12),
-        legend.text = element_text(size = 12),
-        legend.key = element_rect(linetype = 0),
-        legend.key.size = unit(0.5, "cm"),
-        legend.position = "top",
-        axis.title = element_text(size = 12),
-        axis.text.x = element_text(size = 10),
-        axis.text.y = element_text(size = 10),
-        axis.ticks = element_line(colour = "gray50", size = 0.5))
+## Get data --------------------------------------------------------------------
 
-legend.format <- function (prefix = "", 
-                           suffix = "", 
-                           between = " &ndash; ", 
-                           digits = 3, 
-                           big.mark = ",", 
-                           transform = identity) {
-  formatNum <- function(x) {
-    format(round(transform(x), digits), trim = TRUE, 
-           scientific = FALSE, big.mark = big.mark)
-  }
-    function(type, ...) {
-        switch(type, numeric = (function(cuts) {
-            paste0(prefix, formatNum(cuts), suffix)
-        })(...), bin = (function(cuts) {
-            n = length(cuts)
-            paste0(prefix, formatNum(cuts[-n]), between, formatNum(cuts[-1]), 
-                suffix)
-        })(...), quantile = (function(cuts, p) {
-            n = length(cuts)
-            p = paste0(round(p * 100), "%")
-            cuts = paste0(formatNum(cuts[-n]), between, formatNum(cuts[-1]), suffix)
-        })(...), factor = (function(cuts) {
-            paste0(prefix, as.character(transform(cuts)), suffix)
-        })(...))
-    }
-}
+## Get discussions dataset
+discussions <- get_db_discussions()
 
-## Source data
-source("data.R")
+## Get themes data
+themes <- get_themes()$themes
+
+## Get topics by themes data
+topics <- get_themes_topics()
+
+## Process dailies topics data
+daily_interactions <- get_db_topics_daily_interactions()
+
+## Process weeklies topics data
+weekly_interactions <- get_db_topics_weekly_interactions()
+
+## Process monthlies topics data
+monthly_interactions <- get_db_topics_monthly_interactions()
+
+## Process yearlies topics data
+yearly_interactions <- get_db_topics_yearly_interactions()
 ```
 
 Overview
