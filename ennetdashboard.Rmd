@@ -342,7 +342,7 @@ output$views <- renderPlotly({
                            y = `New views per post per year`)) +
       geom_col(fill = unicef_blue, colour = unicef_blue, alpha = 0.7) +
       scale_x_date(name = "", 
-                   #date_breaks = "1 month",
+                   date_breaks = "1 month",
                    date_labels = "%Y") %>%
       labs(title = "New views per post per year by theme",
            x = "",
