@@ -26,17 +26,16 @@ jobs:
         uses: actions/cache@v2
         with:
           path: ${{ env.R_LIBS_USER }}
-          key: ${{ runner.os }}-shinydoc1
+          key: ${{ runner.os }}-shinydoc
           restore-keys: |
             ${{ runner.os }}-
         
       - name: Install dependencies
         if: steps.cache.outputs.cache-hit != 'true'
         run: |
-          install.packages(c("shiny", "flexdashboard", "tidyr", "magrittr",
-                             "ggplot2", "plotly", "tidyr",
-                             "plotly", "lubridate", "leaflet", "RColorBrewer", 
-                             "rsconnect", "remotes"))
+          install.packages(c("shiny", "flexdashboard", "magrittr",
+                             "ggplot2", "plotly", "tidyr", "dplyr",
+                             "lubridate", "rsconnect", "remotes"))
           remotes::install_github("katilingban/ennet")
         shell: Rscript {0}
         
