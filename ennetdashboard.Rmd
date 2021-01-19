@@ -89,16 +89,16 @@ themes <- get_themes()$themes
 topics <- get_themes_topics()
 
 ## Process dailies topics data
-daily_interactions <- get_db_topics_daily_interactions()
+daily_interactions <- get_db_topics(id = "daily")
 
 ## Process weeklies topics data
-weekly_interactions <- get_db_topics_weekly_interactions()
+weekly_interactions <- get_db_topics(id = "weekly")
 
 ## Process monthlies topics data
-monthly_interactions <- get_db_topics_monthly_interactions()
+monthly_interactions <- get_db_topics(id = "monthly")
 
 ## Process yearlies topics data
-yearly_interactions <- get_db_topics_yearly_interactions()
+yearly_interactions <- get_db_topics(id = "yearly")
 ```
 
 Overview
