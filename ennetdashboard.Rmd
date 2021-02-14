@@ -10,6 +10,13 @@ output:
     theme: lumen
 ---
 
+<!--- Custom CSS: Change colour of tabset top border --->
+<style>
+.nav-tabs-custom > .nav-tabs > li.active { border-top-color: #43925B }
+</style>
+<!--- end --->
+
+
 ```{r setup, include = FALSE}
 ## Libraries -------------------------------------------------------------------
 library(flexdashboard)
@@ -92,10 +99,14 @@ themes <- get_themes()$themes
 topics <- get_themes_topics()
 
 ## Process dailies topics data
-daily_interactions <- get_db_topics(id = "daily")
+daily_interactions <- get_db_topics(id = "daily") %>%
+  dplyr::mutate(`New Replies` = ifelse(`New Replies` < 0, 0, `New Replies`),
+                `New Views` = ifelse(`New Views` < 0, 0, `New Views`))
 
 ## Process weeklies topics data
-weekly_interactions <- get_db_topics(id = "weekly")
+weekly_interactions <- get_db_topics(id = "weekly") %>%
+  dplyr::mutate(`New Replies` = ifelse(`New Replies` < 0, 0, `New Replies`),
+                `New Views` = ifelse(`New Views` < 0, 0, `New Views`))
 
 ## Process monthlies topics data
 monthly_interactions <- get_db_topics(id = "monthly")
@@ -162,7 +173,8 @@ output$posts <- renderPlotly({
     y <- x %>%
       count_topics_theme_time(by_time = "day") %>%
       ggplot(mapping = aes(x = day, y = n)) +
-      geom_col(fill = ennet_green, colour = ennet_green, alpha = 0.5) +
+      #geom_col(fill = ennet_green, colour = ennet_green, alpha = 0.5) +
+      geom_area(fill = ennet_green, colour = ennet_green, alpha = 0.5) +
       scale_x_date(name = "", 
                    #date_breaks = "1 month",
                    date_labels = "%b %Y") %>%
@@ -178,9 +190,10 @@ output$posts <- renderPlotly({
     y <- x %>%
       count_topics_theme_time(by_time = "week") %>%
       ggplot(mapping = aes(x = week, y = n)) +
-      geom_col(fill = ennet_green, 
-               colour = ennet_green, 
-               alpha = 0.5) +
+      #geom_col(fill = ennet_green, 
+      #         colour = ennet_green, 
+      #         alpha = 0.5) +
+      geom_area(fill = ennet_green, colour = ennet_green, alpha = 0.5) +
       scale_x_date(name = "",
                    #date_breaks = "4 weeks", 
                    date_labels = "Week %V-%Y") +
@@ -197,7 +210,8 @@ output$posts <- renderPlotly({
     y <- x %>%
       count_topics_theme_time(by_time = "month") %>%
       ggplot(mapping = aes(x = month, y = n)) +
-      geom_col(fill = ennet_green, colour = ennet_green, alpha = 0.5) +
+      #geom_col(fill = ennet_green, colour = ennet_green, alpha = 0.5) +
+      geom_area(fill = ennet_green, colour = ennet_green, alpha = 0.5) +
       scale_x_date(name = "", 
                    #date_breaks = "3 months", 
                    date_labels = "%b %Y") +
@@ -214,7 +228,8 @@ output$posts <- renderPlotly({
     y <- x %>%
       count_topics_theme_time(by_time = "year") %>%
       ggplot(mapping = aes(x = year, y = n)) +
-      geom_col(fill = ennet_green, colour = ennet_green, alpha = 0.5) +
+      #geom_col(fill = ennet_green, colour = ennet_green, alpha = 0.5) +
+      geom_area(fill = ennet_green, colour = ennet_green, alpha = 0.5) +
       scale_x_date(name = "", date_labels = "%Y") +
       labs(title = "Number of questions posted per year by theme",
            x = "",
