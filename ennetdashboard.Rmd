@@ -195,7 +195,7 @@ output$posts <- renderPlotly({
       #         alpha = 0.5) +
       geom_area(fill = ennet_green, colour = ennet_green, alpha = 0.5) +
       scale_x_date(name = "",
-                   #date_breaks = "4 weeks", 
+                   #date_breaks = "12 weeks", 
                    date_labels = "Week %V-%Y") +
       labs(title = "Number of questions posted per week by theme",
            x = "",
