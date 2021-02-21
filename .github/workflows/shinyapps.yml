@@ -12,6 +12,10 @@ jobs:
   shinyapps:
     runs-on: macOS-latest
     
+    strategy:
+      matrix:
+        r-version: [4.0.3]
+    
     steps:
       - uses: actions/checkout@v2
       
