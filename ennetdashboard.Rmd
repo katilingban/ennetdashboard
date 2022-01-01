@@ -29,6 +29,8 @@ library(remotes)
 library(dplyr)
 library(tidyr)
 library(ennet)
+library(tidytext)
+library(RColorBrewer)
 
 ## Create Mapbox base layer objects for leaflet mapping ------------------------
 mapbox.satellite <- "https://api.mapbox.com/styles/v1/mapbox/satellite-streets-v10/tiles/256/{z}/{x}/{y}?access_token=pk.eyJ1IjoiZXJuZXN0Z3VldmFycmEiLCJhIjoiejRRLXlZdyJ9.sqS1zi0rDH5CIzvcn9SXSg"
@@ -173,8 +175,8 @@ output$posts <- renderPlotly({
     y <- x %>%
       count_topics_theme_time(by_time = "day") %>%
       ggplot(mapping = aes(x = day, y = n)) +
-      #geom_col(fill = ennet_green, colour = ennet_green, alpha = 0.5) +
-      geom_area(fill = ennet_green, colour = ennet_green, alpha = 0.5) +
+      geom_col(fill = ennet_green, colour = ennet_green, alpha = 0.5) +
+      #geom_area(fill = ennet_green, colour = ennet_green, alpha = 0.5) +
       scale_x_date(name = "", 
                    #date_breaks = "1 month",
                    date_labels = "%b %Y") %>%
@@ -190,10 +192,10 @@ output$posts <- renderPlotly({
     y <- x %>%
       count_topics_theme_time(by_time = "week") %>%
       ggplot(mapping = aes(x = week, y = n)) +
-      #geom_col(fill = ennet_green, 
-      #         colour = ennet_green, 
-      #         alpha = 0.5) +
-      geom_area(fill = ennet_green, colour = ennet_green, alpha = 0.5) +
+      geom_col(fill = ennet_green, 
+               colour = ennet_green, 
+               alpha = 0.5) +
+      #geom_area(fill = ennet_green, colour = ennet_green, alpha = 0.5) +
       scale_x_date(name = "",
                    #date_breaks = "12 weeks", 
                    date_labels = "Week %V-%Y") +
@@ -210,8 +212,8 @@ output$posts <- renderPlotly({
     y <- x %>%
       count_topics_theme_time(by_time = "month") %>%
       ggplot(mapping = aes(x = month, y = n)) +
-      #geom_col(fill = ennet_green, colour = ennet_green, alpha = 0.5) +
-      geom_area(fill = ennet_green, colour = ennet_green, alpha = 0.5) +
+      geom_col(fill = ennet_green, colour = ennet_green, alpha = 0.5) +
+      #geom_area(fill = ennet_green, colour = ennet_green, alpha = 0.5) +
       scale_x_date(name = "", 
                    #date_breaks = "3 months", 
                    date_labels = "%b %Y") +
@@ -228,8 +230,8 @@ output$posts <- renderPlotly({
     y <- x %>%
       count_topics_theme_time(by_time = "year") %>%
       ggplot(mapping = aes(x = year, y = n)) +
-      #geom_col(fill = ennet_green, colour = ennet_green, alpha = 0.5) +
-      geom_area(fill = ennet_green, colour = ennet_green, alpha = 0.5) +
+      geom_col(fill = ennet_green, colour = ennet_green, alpha = 0.5) +
+      #geom_area(fill = ennet_green, colour = ennet_green, alpha = 0.5) +
       scale_x_date(name = "", date_labels = "%Y") +
       labs(title = "Number of questions posted per year by theme",
            x = "",
@@ -262,8 +264,8 @@ output$views <- renderPlotly({
              `New views per post per day` = `New Views` / nPosts) %>%
       ggplot(mapping = aes(x = `Extraction Date`, 
                            y = `New views per post per day`)) +
-      #geom_col(fill = ennet_green, colour = ennet_green, alpha = 0.5) +
-      geom_area(fill = ennet_green, colour = ennet_green, alpha = 0.5) +
+      geom_col(fill = ennet_green, colour = ennet_green, alpha = 0.5) +
+      #geom_area(fill = ennet_green, colour = ennet_green, alpha = 0.5) +
       scale_x_date(name = "", 
                    date_breaks = "1 month",
                    date_labels = "%b %Y") %>%
@@ -283,8 +285,8 @@ output$views <- renderPlotly({
              `New views per post per week` = `New Views` / nPosts) %>%
       ggplot(mapping = aes(x = `Extraction Week`, 
                            y = `New views per post per week`)) +
-      #geom_col(fill = ennet_green, colour = ennet_green, alpha = 0.5) +
-      geom_area(fill = ennet_green, colour = ennet_green, alpha = 0.5) +
+      geom_col(fill = ennet_green, colour = ennet_green, alpha = 0.5) +
+      #geom_area(fill = ennet_green, colour = ennet_green, alpha = 0.5) +
       scale_x_date(name = "", 
                    date_breaks = "1 month",
                    date_labels = "Week %V-%Y") %>%
@@ -304,8 +306,8 @@ output$views <- renderPlotly({
              `New views per post per month` = `New Views` / nPosts) %>%
       ggplot(mapping = aes(x = `Extraction Month`, 
                            y = `New views per post per month`)) +
-      #geom_col(fill = ennet_green, colour = ennet_green, alpha = 0.5) +
-      geom_area(fill = ennet_green, colour = ennet_green, alpha = 0.5) +
+      geom_col(fill = ennet_green, colour = ennet_green, alpha = 0.5) +
+      #geom_area(fill = ennet_green, colour = ennet_green, alpha = 0.5) +
       scale_x_date(name = "", 
                    date_breaks = "1 month",
                    date_labels = "%b-%Y") %>%
@@ -325,8 +327,8 @@ output$views <- renderPlotly({
              `New views per post per year` = `New Views` / nPosts) %>%
       ggplot(mapping = aes(x = `Extraction Year`, 
                            y = `New views per post per year`)) +
-      #geom_col(fill = ennet_green, colour = ennet_green, alpha = 0.5) +
-      geom_area(fill = ennet_green, colour = ennet_green, alpha = 0.5) +
+      geom_col(fill = ennet_green, colour = ennet_green, alpha = 0.5) +
+      #geom_area(fill = ennet_green, colour = ennet_green, alpha = 0.5) +
       scale_x_date(name = "", 
                    date_breaks = "1 month",
                    date_labels = "%Y") %>%
@@ -361,8 +363,8 @@ output$replies <- renderPlotly({
              `New replies per 10000 views per day` = `New Replies` / (Views / 10000)) %>%
       ggplot(mapping = aes(x = `Extraction Date`, 
                            y = `New replies per 10000 views per day`)) +
-      #geom_col(fill = ennet_green, colour = ennet_green, alpha = 0.5) +
-      geom_area(fill = ennet_green, colour = ennet_green, alpha = 0.5) +
+      geom_col(fill = ennet_green, colour = ennet_green, alpha = 0.5) +
+      #geom_area(fill = ennet_green, colour = ennet_green, alpha = 0.5) +
       scale_x_date(name = "", 
                    #date_breaks = "1 month",
                    date_labels = "%b %Y") %>%
@@ -382,8 +384,8 @@ output$replies <- renderPlotly({
              `New replies per 10000 views per week` = `New Replies` / (Views / 10000)) %>%
       ggplot(mapping = aes(x = `Extraction Week`, 
                            y = `New replies per 10000 views per week`)) +
-      #geom_col(fill = ennet_green, colour = ennet_green, alpha = 0.5) +
-      geom_area(fill = ennet_green, colour = ennet_green, alpha = 0.5) +
+      geom_col(fill = ennet_green, colour = ennet_green, alpha = 0.5) +
+      #geom_area(fill = ennet_green, colour = ennet_green, alpha = 0.5) +
       scale_x_date(name = "", 
                    #date_breaks = "1 month",
                    date_labels = "Week %V-%Y") %>%
@@ -403,8 +405,8 @@ output$replies <- renderPlotly({
              `New replies per 10000 views per month` = `New Replies` / (Views / 10000)) %>%
       ggplot(mapping = aes(x = `Extraction Month`, 
                            y = `New replies per 10000 views per month`)) +
-      #geom_col(fill = ennet_green, colour = ennet_green, alpha = 0.5) +
-      geom_area(fill = ennet_green, colour = ennet_green, alpha = 0.5) +
+      geom_col(fill = ennet_green, colour = ennet_green, alpha = 0.5) +
+      #geom_area(fill = ennet_green, colour = ennet_green, alpha = 0.5) +
       scale_x_date(name = "", 
                    #date_breaks = "1 month",
                    date_labels = "%b-%Y") %>%
@@ -424,8 +426,8 @@ output$replies <- renderPlotly({
              `New replies per 10000 views per year` = `New Replies` / (Views / 10000)) %>%
       ggplot(mapping = aes(x = `Extraction Year`, 
                            y = `New replies per 10000 views per year`)) +
-      #geom_col(fill = ennet_green, colour = ennet_green, alpha = 0.5) +
-      geom_area(fill = ennet_green, colour = ennet_green, alpha = 0.5) +
+      geom_col(fill = ennet_green, colour = ennet_green, alpha = 0.5) +
+      #geom_area(fill = ennet_green, colour = ennet_green, alpha = 0.5) +
       scale_x_date(name = "", 
                    #date_breaks = "1 month",
                    date_labels = "%Y") %>%
@@ -471,6 +473,41 @@ selectInput(inputId = "frequency_choices",
             selected = "Weekly",
             choices = c("Weekly", "Monthly", "Yearly"))
 
+output$select_period <- renderUI({
+  req(input$frequency_choices)
+  
+  breaks <- input$frequency_choices %>%
+    stringr::str_remove(pattern = "ly") %>%
+    stringr::str_to_lower()
+  
+  choices <- topics$Posted %>%
+    cut(breaks = breaks, start.on.monday = FALSE) %>%
+    levels()
+  
+  if (input$frequency_choices == "Weekly") {
+    choices <- choices %>%
+      strftime(format = "Week %V %Y")
+  }
+  
+  if (input$frequency_choices == "Monthly") {
+    choices <- choices %>%
+      strftime(format = "%b %Y")
+  }
+  
+  if (input$frequency_choices == "Yearly") {
+    choices <- choices %>%
+      strftime(format = "%Y")
+  }
+  
+  selectInput(inputId = "periods",
+              label = "Choose time periods",
+              selected = rev(choices)[1:2],
+              choices = rev(choices),
+              multiple = TRUE)
+})
+
+uiOutput("select_period")
+
 #selectInput(inputId = "scale_choices",
 #            label = "Scale options",
 #            selected = "fixed",
@@ -479,6 +516,64 @@ selectInput(inputId = "frequency_choices",
 
 Row {.tabset .tabset-fade}
 --------------------------------------------------------------------------------
+
+### Posts
+
+```{r test_charts}
+output$test_charts <- renderPlotly({
+  req(input$periods, input$frequency_choices)
+  
+  if (input$frequency_choices == "Weekly") {
+    x <- topics %>%
+      mutate(
+        periods = cut(Posted, breaks = "week", start.on.monday = FALSE) %>%
+          strftime(format = "Week %V %Y")
+      )
+  }
+  
+  if (input$frequency_choices == "Monthly") {
+    x <- topics %>%
+      mutate(
+        periods = cut(Posted, breaks = "month") %>%
+          strftime(format = "%b %Y")
+      )
+  }
+  
+  if (input$frequency_choices == "Yearly") {
+    x <- topics %>%
+      mutate(
+        periods = cut(Posted, breaks = "year") %>%
+          strftime(format = "%Y")
+      )
+  }
+  
+  x <- x %>%
+    filter(periods %in% input$periods) %>%
+    group_by(periods) %>%
+    count_topics_theme(.sort = TRUE) %>%
+    ungroup() %>%
+    mutate(
+      Theme = stringr::str_wrap(Theme, width = 30),
+      Theme = reorder_within(x = Theme, 
+                             by = -n,
+                             within = periods)
+    ) %>%
+    ggplot(mapping = aes(x = Theme, y = n)) +
+    geom_col(colour = ennet_green, fill = ennet_green, alpha = 0.5) +
+    labs(title = "",
+         x = "", 
+         y = "Number of posts") +
+    facet_wrap(~ periods, ncol = 2, scales = "free_y") +
+    scale_x_reordered() +
+    coord_flip() +
+    unicef_theme
+           
+  ggplotly(p = x, width = 800, tooltip = c("x", "y"))
+})
+
+plotlyOutput(outputId = "test_charts")
+```
+
 
 ### Posts
 
