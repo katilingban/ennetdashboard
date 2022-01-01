@@ -13,37 +13,26 @@ on:
       
 jobs:
   deploy_shinyapps:
-    runs-on: macOS-latest
-    
-    strategy:
-      matrix:
-        r-version: [4.0.3]
-    
+    runs-on: ubuntu-latest
+    container: rocker/tidyverse:4.1.2
     steps:
       - uses: actions/checkout@v2
       
-      - name: Setup R
-        uses: r-lib/actions/setup-r@v1
-        
-      - name: Setup pandoc
-        uses: r-lib/actions/setup-pandoc@v1
-        
-      - name: Cache dependencies
-        id: cache
-        uses: actions/cache@v2
-        with:
-          path: ${{ env.R_LIBS_USER }}
-          key: ${{ runner.os }}-shinydoc4
-          restore-keys: |
-            ${{ runner.os }}-
-        
-      - name: Install dependencies
-        if: steps.cache.outputs.cache-hit != 'true'
+      - name: Install system dependencies
         run: |
-          install.packages(c("shiny", "flexdashboard", "magrittr",
-                             "ggplot2", "plotly", "tidyr", "dplyr",
-                             "lubridate", "rsconnect", "remotes"))
-          remotes::install_github("katilingban/ennet")
+          apt-get update && apt-get install -y --no-install-recommends \
+          git-crypt libxt6 libglpk-dev
+      
+      - name: Install packages from renv.lock (with cache)
+        if: ${{ !env.ACT }}  
+        uses: r-lib/actions/setup-renv@master
+        with:
+          cache-version: 2
+
+      - name: Install packages from renv.lock (local, no cache)
+        if: ${{ env.ACT }}  
+        run: |
+          renv::restore()
         shell: Rscript {0}
         
       - name: Configure shinyapps.io account
