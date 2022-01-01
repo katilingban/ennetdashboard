@@ -1,15 +1,18 @@
-name: shinyapps
+name: deploy_shinyapps
 
 on:
   schedule:
-    - cron: "0 0 * * *"
+    - cron: "0 * * * *"
   push:
     branches:
       - main
       - master
+  workflow_dispatch:
+    branches:
+      - '*'
       
 jobs:
-  shinyapps:
+  deploy_shinyapps:
     runs-on: macOS-latest
     
     strategy:
