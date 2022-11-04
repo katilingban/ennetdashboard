@@ -2,11 +2,11 @@ name: deploy_shinyapps
 
 on:
   schedule:
-    - cron: "0 * * * *"
-  push:
-    branches:
-      - main
-      - master
+    - cron: "0 */4 * * *"
+  # push:
+  #   branches:
+  #     - main
+  #     - master
   workflow_dispatch:
     branches:
       - '*'
@@ -14,7 +14,7 @@ on:
 jobs:
   deploy_shinyapps:
     runs-on: ubuntu-latest
-    container: rocker/tidyverse:4.2.1
+    container: rocker/tidyverse:4.2.2
     steps:
       - uses: actions/checkout@v3
       
