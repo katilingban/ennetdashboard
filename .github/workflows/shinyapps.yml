@@ -14,7 +14,7 @@ on:
 jobs:
   deploy_shinyapps:
     runs-on: ubuntu-latest
-    container: rocker/tidyverse:4.2.2
+    container: rocker/tidyverse:4.2.1
     steps:
       - uses: actions/checkout@v3
       
